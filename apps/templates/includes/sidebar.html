@@ -1,0 +1,64 @@
+<!-- [ navigation menu ] start -->
+<nav class="pcoded-navbar">
+    <div class="navbar-wrapper">
+        <div class="navbar-brand header-logo">
+            <a href="/" class="b-brand">
+                <div class="b-bg">
+                    <i class="feather icon-trending-up"></i>
+                </div>
+                <span class="b-title">Gussmann</span>
+            </a>
+            <a class="mobile-menu" id="mobile-collapse" href="javascript:"><span></span></a>
+        </div>
+        <div class="navbar-content scroll-div">
+            <ul class="nav pcoded-inner-navbar" style="display: flex; flex-direction: column; height: 88vh;">
+                <li class="nav-item pcoded-menu-caption">
+                    <label>Navigation</label>
+                </li>
+                <li data-username="dashboard Default Ecommerce CRM Analytics Crypto Project" 
+                    class="nav-item {% if 'index' in segment %} active {% endif %}">
+                    <a href="/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-home"></i></span><span
+                            class="pcoded-mtext">Dashboard</span></a>
+                </li> 
+           <!--       <li data-username="Extractor Page" 
+                    class="nav-item {% if '-extract' in segment %} active {% endif %}">
+                    <a href="/index/extractor-extract" class="nav-link">
+                        <span class="pcoded-micon"><i class="feather icon-file-text"></i></span>
+                            <span class="pcoded-mtext">Extractor Page</span></a>
+                </li>         
+      <li data-username="Fixed Extractor Page" 
+                    class="nav-item {% if 'viewport' in segment %} active {% endif %}">
+                    <a href="/index/extractor-viewport" class="nav-link">
+                        <span class="pcoded-micon"><i class="feather icon-file-text"></i></span>
+                            <span class="pcoded-mtext">Fixed Position Extractor Page</span></a>
+                </li>  
+            -->     
+                <li data-username="Extractor List" 
+                    class="nav-item {% if 'extractor-list' in segment %} active {% endif %}">
+                    <a href="/index/extractor-list" class="nav-link">
+                        <span class="pcoded-micon"><i class="feather icon-file-text"></i></span>
+                            <span class="pcoded-mtext">Extractor List</span></a>
+                </li>          
+              <!--<li data-username="Profile Page" 
+                    class="nav-item {% if 'profile' in segment %} active {% endif %}">
+                    <a href="/profile" class="nav-link">
+                        <span class="pcoded-micon"><i class="feather icon-user"></i></span>
+                            <span class="pcoded-mtext">Profile Page</span></a>
+                </li>         --> 
+
+
+           
+
+          
+<li data-username="Disabled Menu" class="nav-item" style="margin-top: auto;">
+                    <a href="{{ url_for('authentication_blueprint.logout') }}" class="nav-link">
+                        <span class="pcoded-micon"><i class="feather icon-power"></i></span><span class="pcoded-mtext">Logout</span>
+                    </a>
+                </li>
+            
+            </ul>
+                
+        </div>
+    </div>
+</nav>
+<!-- [ navigation menu ] end -->

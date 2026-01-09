@@ -1,0 +1,203 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Extractor {% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="/static/assets/css/style.css">
+<link rel="stylesheet" href="/static/assets/css/dark.css">
+<link rel="stylesheet" href="/static/assets/css/extractor.css">
+<link rel="stylesheet" href="/static/assets/css/extractor-dark.css">
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="pcoded-main-container">
+    <div class="extractor-main-row">
+        <!-- Document Panel -->
+        <div class="extractor-document-panel">
+            <div class="dashboard-card upload-card">
+                <div class="card-body d-flex flex-column justify-content-between align-items-center">
+                    <div class="upload-icon">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M16 8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                    </div>
+                    <div class="dashboard-card-title">Upload Document</div>
+                    <div class="dashboard-card-text">Drag and drop your file here</div>
+                    <button class="dashboard-btn dashboard-btn-primary upload-btn">Select File</button>
+                    <div class="dashboard-card-text" style="font-size:0.98rem;color:#888;margin-bottom:0;">PDF, PNG, JPG up to 10MB</div>
+                </div>
+            </div>
+            
+            <!-- Document Preview Container (Hidden by default) -->
+            <div class="document-preview-container" style="display: none;">
+                <div class="document-header">
+                    <div class="document-info">
+                        <span class="document-name"></span>
+                        <span class="document-size"></span>
+                    </div>
+                    <div class="document-actions">
+                        <button class="dashboard-btn dashboard-btn-primary upload-btn">Choose Another File</button>
+                        <button class="dashboard-btn dashboard-btn-outline remove-file-btn">Remove</button>
+                    </div>
+                </div>
+                <div class="document-content">
+                    <!-- PDF or Image content will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+    <!-- Schema Panel -->
+    <div class="extractor-schema-panel">
+        <div class="dashboard-card extractor-schema-card">
+            <div class="dashboard-title schema-title">Schema Definition</div>
+            <div class="schema-subtitle">Invoice Extraction Fields:</div>
+            
+            <!-- Field Definitions -->
+            {% set fields = [
+                {'name': 'invoice_number', 'type': 'text', 'desc': 'The invoice or bill number', 'category': 'basic'},
+                {'name': 'purchase_order_number', 'type': 'text', 'desc': 'The purchase order number of invoice or bill', 'category': 'basic'},
+                {'name': 'invoice_due_date', 'type': 'date', 'desc': 'The due date of the invoice, formatted as YYYY-MM-DD', 'category': 'basic'},
+                {'name': 'invoice_date', 'type': 'date', 'desc': 'The date of the invoice, formatted as YYYY-MM-DD', 'category': 'basic'},
+                {'name': 'invoice_subtotal_amount', 'type': 'number', 'desc': 'The subtotal amount of the invoice', 'category': 'amounts'},
+                {'name': 'invoice_tax_amount', 'type': 'number', 'desc': 'The tax amount of the invoice', 'category': 'amounts'},
+                {'name': 'invoice_total_amount', 'type': 'number', 'desc': 'The total amount of the invoice', 'category': 'amounts'},
+                {'name': 'seller_name', 'type': 'text', 'desc': 'The name of the seller', 'category': 'basic'},
+                {'name': 'line_items', 'type': 'table', 'desc': 'The items in the invoice', 'category': 'table', 'subfields': [
+                    {'name': 'description', 'type': 'text', 'desc': 'The item description or name'},
+                    {'name': 'quantity', 'type': 'number', 'desc': 'The quantity of the item'},
+                    {'name': 'unit_price', 'type': 'number', 'desc': 'The unit price or rate of the item'},
+                    {'name': 'item_total_amount', 'type': 'number', 'desc': 'The total amount of the item'}
+                ]}
+            ] %}
+            
+            <!-- Render Fields -->
+            {% for field in fields %}
+            <div class="extractor-field-row {{ 'table-field' if field.type == 'table' else '' }}" id="field-{{ loop.index }}">
+                <div class="field-header">
+                    <div>
+                        <span class="field-name">{{ field.name }}</span>
+                        <span class="field-type-badge {{ field.type }}">{{ field.type }}</span>
+                    </div>
+                    <div class="field-actions">
+                        <button class="action-btn edit-btn" data-idx="{{ loop.index }}" data-action="edit" title="Edit Field">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20h9"/>
+                                <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+                            </svg>
+                        </button>
+                        <button class="action-btn delete delete-btn" data-idx="{{ loop.index }}" data-action="delete" title="Delete Field">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 6h18"/>
+                                <path d="M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6"/>
+                                <path d="M10 11v6"/>
+                                <path d="M14 11v6"/>
+                                <path d="M5 6V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="field-description">{{ field.desc }}</div>
+                
+                <!-- Table Sub-fields Display -->
+                {% if field.type == 'table' and field.subfields %}
+                <div class="table-subfields">
+                    <div class="table-columns-title">Table Columns:</div>
+                    <div class="subfields-container">
+                        {% for subfield in field.subfields %}
+                        <div class="subfield-wrapper">
+                            <div class="subfield-row">
+                                <div>
+                                    <span class="subfield-name">{{ subfield.name }}</span>
+                                    <span class="subfield-type {{ subfield.type }}">{{ subfield.type }}</span>
+                                </div>
+                                <button class="column-delete-btn delete-subfield-btn" data-subfield="{{ subfield.name }}" title="Remove Column">×</button>
+                            </div>
+                            <div class="subfield-description">{{ subfield.desc }}</div>
+                        </div>
+                        {% endfor %}
+                        <button class="add-column-btn add-subfield-btn" style="display:none;">
+                            + Add Table Column
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Field Editor (Hidden by default) -->
+                <div class="field-editor" id="editor-{{ loop.index }}">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="field-label">Field Type</label>
+                            <select class="form-control field-type-select">
+                                <option value="text" {{ 'selected' if field.type == 'text' else '' }}>Text</option>
+                                <option value="number" {{ 'selected' if field.type == 'number' else '' }}>Number</option>
+                                <option value="date" {{ 'selected' if field.type == 'date' else '' }}>Date</option>
+                                <option value="table" {{ 'selected' if field.type == 'table' else '' }}>Table</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="field-label">Field Name</label>
+                            <input type="text" class="form-control field-name-input" value="{{ field.name }}">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="field-label">Field Description</label>
+                        <textarea class="form-control field-desc-input" rows="3" placeholder="#DESCRIPTION: short description of the field&#10;&#10;# LABEL SYNONYM: e.g., 'Invoice No.', 'Inv #', 'Ref No.'&#10;&#10;# LOCATION: e.g. in the header or bottom of page or next to delivery address">{{ field.desc }}</textarea>
+                    </div>
+                    
+                    <!-- Table Field Configuration -->
+                    <div class="table-config" style="display:{{ 'block' if field.type == 'table' else 'none' }};">
+                        <label class="table-config-title">Table Columns Configuration</label>
+                        <div class="table-columns">
+                            {% if field.type == 'table' and field.subfields %}
+                                {% for subfield in field.subfields %}
+                                <div class="table-column-row">
+                                    <div class="column-input-group">
+                                        <label class="column-label">Column Name</label>
+                                        <input type="text" class="form-control column-name-input" value="{{ subfield.name }}">
+                                        <label class="column-label">Description</label>
+                                        <input type="text" class="form-control column-description-input" value="{{ subfield.desc or '' }}" placeholder="Enter column description...">
+                                    </div>
+                                    <div class="column-type-group">
+                                        <label class="column-label">Type</label>
+                                        <select class="form-control column-type-select">
+                                            <option value="text" {{ 'selected' if subfield.type == 'text' else '' }}>Text</option>
+                                            <option value="number" {{ 'selected' if subfield.type == 'number' else '' }}>Number</option>
+                                            <option value="date" {{ 'selected' if subfield.type == 'date' else '' }}>Date</option>
+                                        </select>
+                                    </div>
+                                    <div class="column-actions">
+                                        <button type="button" class="column-delete-btn remove-column-btn">×</button>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <button type="button" class="add-column-btn">+ Add Column</button>
+                    </div>
+                    {% if field.rect != null %}
+                       <div>
+                        <label class="field-label">Viewports Description</label>
+                        <textarea id="viewport-description" class="form-control" rows="3" readonly></textarea>
+                    </div>
+                    {% endif %}
+                    <div class="editor-actions table-action-buttons">
+                        <button class="table-save-btn save-btn" data-idx="{{ loop.index }}" data-action="save">Save</button>
+                        <button class="table-cancel-btn cancel-btn" data-idx="{{ loop.index }}" data-action="cancel">Cancel</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <button class="extractor-add-field-btn">+ Add New Field</button>
+        </div>
+        
+        <div class="extractor-bottom-bar">
+            <button class="dashboard-btn dashboard-btn-primary">Extract Document</button>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block javascripts %}
+<script src="/static/assets/js/extractor.js"></script>
+{% endblock javascripts %}

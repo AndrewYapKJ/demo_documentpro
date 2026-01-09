@@ -1,0 +1,294 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Dashboard {% endblock %} 
+
+{% block stylesheets %}
+<link rel="stylesheet" href="/static/assets/css/style.css">
+<link rel="stylesheet" href="/static/assets/css/dark.css">
+
+<style>
+  .dashboard-section {
+    background: var(--bs-light, #f8f9fa);
+    border-radius: 10px;
+    padding: 14px 32px 14px 32px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    max-width: 98vw;
+  }
+  .dashboard-card {
+    border-radius: 8px !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: box-shadow 0.2s, border-color 0.2s;
+    border: 1px solid var(--bs-border-color, #e0e0e0) !important;
+    background: var(--bs-white, #fff);
+  }
+  .dashboard-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.09);
+    border-color: var(--bs-primary, #4f8cff) !important;
+  }
+  .dashboard-btn {
+    border-radius: 6px;
+    font-weight: 600;
+    padding: 6px 14px;
+    font-size: 0.95rem;
+    transition: background 0.2s, color 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  }
+  .dashboard-btn-primary {
+    background: var(--bs-primary, #4f8cff);
+    color: #fff;
+    border: none;
+  }
+  .dashboard-btn-primary:hover {
+    background: #2563eb;
+    color: #fff;
+  }
+  .dashboard-btn-outline {
+    border: 2px solid #e0e0e0;
+    background: #fff;
+    color: #333;
+  }
+  .dashboard-btn-outline:hover {
+    background: #f0f4ff;
+    color: #2563eb;
+    border-color: #4f8cff;
+  }
+  .dashboard-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+    color: var(--bs-dark, #222);
+  }
+  .dashboard-subtitle {
+    font-size: 0.92rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+  }
+  .dashboard-card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+  }
+  .dashboard-card-text {
+    font-size: 0.88rem;
+    color: #6c757d;
+    margin-bottom: 0.6rem;
+  }
+  .dashboard-card-title.text-primary, .dashboard-card-title.text-warning, .dashboard-card-title.text-info, .dashboard-card-title.text-success, .dashboard-card-title.text-secondary, .dashboard-card-title.text-danger {
+    color: inherit;
+  }
+  body.dark .dashboard-section {
+    background: #2C394B;
+    color: #fff;
+  }
+  body.dark .dashboard-card {
+    background: #2C394B;
+    color: #fff;
+    border-color: #334756 !important;
+  }
+  body.dark .dashboard-title {
+    color: #fff;
+  }
+  body.dark .dashboard-card-title {
+    color: #fff !important;
+  }
+  body.dark .dashboard-card-title.text-primary {
+    color: #4f8cff !important;
+  }
+  body.dark .dashboard-card-title.text-warning {
+    color: #ffd600 !important;
+  }
+  body.dark .dashboard-card-title.text-info {
+    color: #00bcd4 !important;
+  }
+  body.dark .dashboard-card-title.text-success {
+    color: #4caf50 !important;
+  }
+  body.dark .dashboard-card-title.text-secondary {
+    color: #b0bec5 !important;
+  }
+  body.dark .dashboard-card-title.text-danger {
+    color: #ff5252 !important;
+  }
+  body.dark .dashboard-card-text {
+    color: #d0d0d0;
+  }
+  body.dark .dashboard-btn-outline {
+    background: #2C394B;
+    color: #fff;
+    border-color: #334756;
+  }
+  body.dark .dashboard-btn-outline:hover {
+    background: #334756;
+    color: #4f8cff;
+    border-color: #4f8cff;
+  }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<!-- [ Main Content ] start -->
+<div class="pcoded-main-container">
+  <div class="pcoded-wrapper">
+    <div class="pcoded-content">
+      <div class="pcoded-inner-content">
+        <div class="main-body">
+          <div class="page-wrapper">
+            <div class="container-fluid">
+              <div class="row mb-2">
+                <div class="col-12 dashboard-section">
+                  <div class="dashboard-title">Get Started</div>
+                  <div class="dashboard-subtitle">Extract and process data from any document type using AI-powered automation</div>
+                  <div class="row mb-2">
+                <!--    <div class="col-md-4">
+                      <div class="card dashboard-card h-100">
+                        <div class="card-body d-flex flex-column justify-content-between">
+                          <div class="d-flex align-items-center mb-2">
+                            <div style="background:#4f8cff1a;color:#4f8cff;padding:8px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:12px;">
+                          
+                              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block;" class="lucide lucide-file-up"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M12 12v6"></path><path d="m15 15-3-3-3 3"></path></svg>
+                            </div>
+                            <div>
+                              <div class="dashboard-card-title">Extract</div>
+                              <div class="dashboard-card-text">Upload a document and extract data instantly</div>
+                            </div>
+                          </div>
+                          <a href="#" class="dashboard-btn dashboard-btn-primary mt-2">Create Extractor</a>
+                        </div>
+                      </div>
+                    </div>
+                  -->
+                      <div class="col-md-4">
+                      <div class="card dashboard-card h-100">
+                        <div class="card-body d-flex flex-column justify-content-between">
+                          <div class="d-flex align-items-center mb-2">
+                            <div style="background:#4f8cff1a;color:#4f8cff;padding:8px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:12px;">
+                              <!-- File Up SVG, fixed size and color -->
+                              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block;" class="lucide lucide-file-up"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M12 12v6"></path><path d="m15 15-3-3-3 3"></path></svg>
+                            </div>
+                            <div>
+                              <div class="dashboard-card-title">Extract Pinpoint</div>
+                              <div class="dashboard-card-text">Upload a document and extract data instantly</div>
+                            </div>
+                          </div>
+                          <a href="/index/extractor-viewport" class="dashboard-btn dashboard-btn-primary mt-2">Create Extractor</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row mb-1">
+                <div class="col-12 dashboard-section">
+                  <div class="dashboard-card-title mb-1">Document Types</div>
+                  <div class="dashboard-card-text mb-2">Pre-configured templates for processing specific document types</div>
+                  <div class="row">
+                    <div class="col-md-4 mb-1">
+                      <div class="card dashboard-card h-100 border-primary">
+                        <div class="card-body">
+                          <div class="d-flex align-items-center mb-2">
+                            <div style="background:#4f46e51a;color:#4f46e5;padding:8px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:10px;">
+                              <!-- Receipt SVG for Invoice -->
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block;" class="lucide lucide-receipt"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><path d="M12 17.5v-11"></path></svg>
+                            </div>
+                            <div class="dashboard-card-title text-primary">Invoice</div>
+                          </div>
+                          <div class="dashboard-card-text">Extracts line items, totals, and payment terms.</div>
+                          <a href="/index/extractor-invoice" class="dashboard-btn dashboard-btn-outline">Create Extractor</a>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-4 mb-1">
+                      <div class="card dashboard-card h-100 border-warning">
+                        <div class="card-body">
+                          <div class="d-flex align-items-center mb-2">
+                            <div style="background:#fbbf241a;color:#fbbf24;padding:8px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:10px;">
+                              <!-- Clipboard List SVG for Purchase Order -->
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block;" class="lucide lucide-clipboard-list"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M12 11h4"></path><path d="M12 16h4"></path><path d="M8 11h.01"></path><path d="M8 16h.01"></path></svg>
+                            </div>
+                            <div class="dashboard-card-title text-warning">Purchase Order</div>
+                          </div>
+                          <div class="dashboard-card-text">Extracts line items, quantities, and delivery terms.</div>
+                          <a href="#" class="dashboard-btn dashboard-btn-outline">Create Extractor</a>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-4 mb-1">
+                      <div class="card dashboard-card h-100 border-info">
+                        <div class="card-body">
+                          <div class="d-flex align-items-center mb-2">
+                            <div style="background:#06b6d41a;color:#06b6d4;padding:8px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:10px;">
+                              <!-- Receipt SVG for Receipt -->
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block;" class="lucide lucide-receipt"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><path d="M12 17.5v-11"></path></svg>
+                            </div>
+                            <div class="dashboard-card-title text-info">Receipt</div>
+                          </div>
+                          <div class="dashboard-card-text">Extracts line items, vendor details and payment details.</div>
+                          <a href="#" class="dashboard-btn dashboard-btn-outline">Create Extractor</a>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-4 mb-1">
+                      <div class="card dashboard-card h-100 border-success">
+                        <div class="card-body">
+                          <div class="d-flex align-items-center mb-2">
+                            <div style="background:#22c55e1a;color:#22c55e;padding:8px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:10px;">
+                              <!-- Credit Card SVG for Bank Statement -->
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block;" class="lucide lucide-credit-card"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
+                            </div>
+                            <div class="dashboard-card-title text-success">Bank Statement</div>
+                          </div>
+                          <div class="dashboard-card-text">Export bank statement transactions to Excel/CSV</div>
+                          <a href="#" class="dashboard-btn dashboard-btn-outline">Create Extractor</a>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-4 mb-1">
+                      <div class="card dashboard-card h-100 border-secondary">
+                        <div class="card-body">
+                          <div class="d-flex align-items-center mb-2">
+                            <div style="background:#0ea5e91a;color:#0ea5e9;padding:8px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:10px;">
+                              <!-- Ship SVG for Bill of Lading -->
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block;" class="lucide lucide-ship"><path d="M12 10.189V14"></path><path d="M12 2v3"></path><path d="M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6"></path><path d="M19.38 20A11.6 11.6 0 0 0 21 14l-8.188-3.639a2 2 0 0 0-1.624 0L3 14a11.6 11.6 0 0 0 2.81 7.76"></path><path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1s1.2 1 2.5 1c2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"></path></svg>
+                            </div>
+                            <div class="dashboard-card-title text-secondary">Bill of Lading</div>
+                          </div>
+                          <div class="dashboard-card-text">Extraction of cargo details, routes, and carrier information.</div>
+                          <a href="#" class="dashboard-btn dashboard-btn-outline">Create Extractor</a>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-4 mb-1">
+                      <div class="card dashboard-card h-100 border-danger">
+                        <div class="card-body">
+                          <div class="d-flex align-items-center mb-2">
+                            <div style="background:#f43f5e1a;color:#f43f5e;padding:8px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:10px;">
+                              <!-- Quote SVG for Quotation -->
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block;" class="lucide lucide-quote"><path d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"></path><path d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"></path></svg>
+                            </div>
+                            <div class="dashboard-card-title text-danger">Quotation</div>
+                          </div>
+                          <div class="dashboard-card-text">Extraction of pricing, terms, and product details.</div>
+                          <a href="#" class="dashboard-btn dashboard-btn-outline">Create Extractor</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="chat-widget"></div>
+
+<!-- [ Main Content ] end -->
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+{% endblock javascripts %}

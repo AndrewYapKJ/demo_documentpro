@@ -1,0 +1,46 @@
+-- IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = N'DocumentPro')
+-- BEGIN
+--     CREATE DATABASE DocumentPro;
+-- END
+
+-- USE DocumentPro;
+
+-- IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'users')
+-- BEGIN
+--     CREATE TABLE users (
+--         id INT IDENTITY(1,1) PRIMARY KEY,
+--         username VARCHAR(64) UNIQUE,
+--         email VARCHAR(64) UNIQUE,
+--         password VARBINARY(MAX),
+--         oauth_github VARCHAR(100)
+--     );
+-- END
+
+
+-- IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'flask_dance_oauth')
+-- BEGIN
+--     CREATE TABLE flask_dance_oauth (
+--         id INT IDENTITY(1,1) PRIMARY KEY,
+--         user_id INT NOT NULL,
+--         provider VARCHAR(50) NOT NULL,
+--         created_at DATETIME NOT NULL,
+--         token NVARCHAR(MAX) NOT NULL,
+--         FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+--     );
+-- END
+
+
+-- ALTER TABLE users ADD api_key VARCHAR(128) UNIQUE NULL;
+-- ALTER TABLE users ADD webhook_url VARCHAR(256) NULL;
+
+-- SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'users';
+
+USE DocumentPro;
+INSERT INTO users (username, email, password, api_key, webhook_url)
+VALUES (
+  'test',
+  'test@example.com',
+  CONVERT(varbinary(max), 'test'),
+  'testapikey123',
+  'https://webhook.site/test'
+);

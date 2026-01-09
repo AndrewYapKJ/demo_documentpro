@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>
+        Gussmann Document - {% block title %}{% endblock %} | AppSeed
+    </title>
+    <!-- HTML5 Shim and Respond.js IE11 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 11]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- Meta -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="description"
+          content="Free Datta Able Admin Template come up with latest Bootstrap 4 framework with basic components, form elements and lots of pre-made layout options"/>
+    <meta name="keywords"
+          content="admin templates, bootstrap admin templates, bootstrap 4, dashboard, dashboard templets, sass admin templets, html admin templates, responsive, bootstrap admin templates free download,premium bootstrap admin templates, datta able, datta able bootstrap admin template, free admin theme, free dashboard template"/>
+    <meta name="author" content="CodedThemes"/>
+
+    <!-- Favicon icon -->
+    <link rel="icon" href="{{ config.ASSETS_ROOT }}/images/favicon.ico" type="image/x-icon">
+    <!-- fontawesome icon -->
+    <link rel="stylesheet" href="{{ config.ASSETS_ROOT }}/fonts/fontawesome/css/fontawesome-all.min.css">
+    <!-- animation css -->
+    <link rel="stylesheet" href="{{ config.ASSETS_ROOT }}/plugins/animation/css/animate.min.css">
+    <!-- vendor css -->
+    <link rel="stylesheet" href="{{ config.ASSETS_ROOT }}/css/style.css">
+    <!-- dark mode css -->
+    <link rel="stylesheet" href="{{ config.ASSETS_ROOT }}/css/dark.css">
+    
+    <!-- Specific CSS goes HERE -->
+    {% block stylesheets %}
+    <link rel="stylesheet" href="https://ddmfm6gbwd3dc.cloudfront.net/static/css/chatbot.css">
+{% endblock stylesheets %}
+
+</head>
+<body>
+
+    <!-- [ Pre-loader ] start -->
+    <div class="loader-bg">
+        <div class="loader-track">
+            <div class="loader-fill"></div>
+        </div>
+    </div>
+
+    <!-- [ Pre-loader ] End -->
+
+    {% include 'includes/sidebar.html' %}
+
+    {% include 'includes/navigation.html' %}
+
+
+    {% block content %}{% endblock content %}
+
+
+    {% include 'includes/scripts.html' %}
+
+    <!-- Specific Page JS goes HERE  -->
+    {% block javascripts %}
+    
+
+
+
+    {% endblock javascripts %}
+<div id="chat-widget"></div>
+</body>
+
+<script>
+    window.ChatbotConfig = {
+    apiUrl: "https://bx22azxigm5zpxxovu7gwq4n6q0uzrup.lambda-url.ap-southeast-1.on.aws",
+      botName: "Support",
+      primaryColor: "#c13730ff",
+      greeting: "Hi! How can I help you today?"
+    };
+  </script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (document.getElementById("chat-widget")) {
+    window.ChatWidget.init("chat-widget");
+  }
+});
+  </script>
+</html>
