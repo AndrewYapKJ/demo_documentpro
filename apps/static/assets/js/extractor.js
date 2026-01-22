@@ -1125,6 +1125,7 @@ class ExtractorManager {
         formData.append('file', this.selectedFile);
         formData.append('schema', JSON.stringify(schemaConfig));
         formData.append('extractor_id', extractorId);
+        formData.append('extraction_mode', 'text'); // Use text-based extraction for invoice page
         
         try {
             const response = await fetch('/api/extract', {

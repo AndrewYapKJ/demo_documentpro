@@ -1,15 +1,3 @@
-# DocumentPro - Flask Application
-
-A Flask-based document extraction and processing application with SQL Server database.
-
-## Prerequisites
-
-- **Python 3.8+** - [Download Python](https://www.python.org/downloads/)
-- **SQL Server** - Local SQL Server instance running on `localhost:1433`
-- **ODBC Driver 18 for SQL Server** - [Download ODBC Driver](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server)
-
-## Quick Start
-
 ### 1. Install Python and Flask
 
 Make sure Python is installed:
@@ -101,24 +89,3 @@ pip install --upgrade pip
 pip install -r requirements.txt --force-reinstall
 ```
 
-## Project Structure
-
-```
-split_project/
-├── apps/                   # Application modules
-│   ├── authentication/     # User authentication
-│   ├── home/              # Main routes
-│   ├── models/            # Database models
-│   └── services/          # Business logic
-├── migrations/            # Database migrations
-├── static/               # Static assets (CSS, JS, images)
-├── templates/            # HTML templates
-├── .env                  # Environment configuration
-├── requirements.txt      # Python dependencies
-├── run.py               # Application entry point
-└── init_db.py           # Database initialization script
-```
-
-## License
-
-Copyright © 2026

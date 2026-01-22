@@ -50,6 +50,7 @@ def extractor_list():
 def api_extract():
     """
     API endpoint to handle document extraction and save results
+    Supports both text-based and vision-based extraction modes
     """
     try:
         # Get uploaded file
@@ -65,6 +66,11 @@ def api_extract():
         schema = json.loads(schema_json)
         extractor_id = request.form.get('extractor_id')
         
+        # Get extraction mode (default to 'vision' for backward compatibility)
+        extraction_mode = request.form.get('extraction_mode', 'vision')
+        
+        logger.info(f"Extraction mode: {extraction_mode}")
+        
         # Read file content
         file_content = file.read()
         
@@ -72,14 +78,15 @@ def api_extract():
         from apps.services.extraction_service import DocumentExtractionService
         extraction_service = DocumentExtractionService()
         
-        # Extract data using OpenAI
-        results = extraction_service.extract_from_file(file_content, schema)
+        # Extract data using OpenAI with specified mode
+        results = extraction_service.extract_from_file(file_content, schema, mode=extraction_mode)
         
         return jsonify({
             'success': True,
             'results': results,
             'filename': file.filename,
-            'extractor_id': extractor_id
+            'extractor_id': extractor_id,
+            'extraction_mode': extraction_mode
         })
         
     except Exception as e:

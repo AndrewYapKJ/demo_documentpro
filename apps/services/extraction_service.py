@@ -187,11 +187,87 @@ class DocumentExtractionService:
         for page in doc:
             text += page.get_text()
         return text
+    
+    def extract_from_file_text_mode(self, file_bytes: bytes, schema: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Extract data from PDF using text extraction (no vision API)
+        Sends raw PDF text to GPT for extraction
+        """
+        try:
+            # Detect file type
+            file_type = self._detect_file_type(file_bytes)
+            
+            if file_type != 'pdf':
+                raise Exception("Text-based extraction only supports PDF files")
+            
+            # Extract text from PDF
+            logger.info("Extracting text from PDF for text-based extraction")
+            pdf_text = self._extract_text_from_pdf(file_bytes)
+            
+            if not pdf_text.strip():
+                raise Exception("No text found in PDF. Please use vision-based extraction for scanned documents.")
+            
+            logger.info("Extracted %d characters of text from PDF", len(pdf_text))
+            
+            # Build extraction schema
+            extraction_schema = self._build_extraction_schema(schema)
+            
+            # Call OpenAI with text-only (no vision)
+            response = self.client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "You are a document extraction engine. "
+                            "Extract data strictly following the given JSON schema. "
+                            "Do not add extra fields. Do not add explanations. "
+                            "Return only valid JSON. "
+                            "If a field is not found in the document, use null. "
+                            "For table fields, return an array of objects even if empty."
+                        )
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Here is the document text:\n\n{pdf_text}\n\nExtract data and return JSON with this exact schema: {json.dumps(extraction_schema)}"
+                    }
+                ],
+                response_format={"type": "json_object"}
+            )
+            
+            # Parse response
+            extracted_data = json.loads(response.choices[0].message.content)
+            logger.info("Text-based extraction successful: %s", extracted_data)
+            
+            return self._format_extraction_results(extracted_data, schema)
+            
+        except json.JSONDecodeError as e:
+            logger.exception("JSON parsing error in OpenAI response: %s", e)
+            logger.debug("Raw response: %s", response.choices[0].message.content)
+            raise e
+        except Exception as e:
+            logger.exception("Error in text-based extraction: %s", e)
+            raise e
         
-    def extract_from_file(self, file_bytes: bytes, schema: Dict[str, Any]) -> Dict[str, Any]:
-      
-      
+    def extract_from_file(self, file_bytes: bytes, schema: Dict[str, Any], mode: str = 'vision') -> Dict[str, Any]:
+        """
+        Extract data from file using specified mode
         
+        Args:
+            file_bytes: File content as bytes
+            schema: Extraction schema definition
+            mode: Extraction mode - 'text' for text-based extraction, 'vision' for OCR/vision-based
+        
+        Returns:
+            Extracted data dictionary
+        """
+        # Use text-based extraction if mode is 'text'
+        if mode == 'text':
+            logger.info("Using text-based extraction mode")
+            return self.extract_from_file_text_mode(file_bytes, schema)
+        
+        # Default to vision-based extraction
+        logger.info("Using vision-based extraction mode")
         try:
          
             file_b64, mime_type = self._prepare_image_for_api(file_bytes)
@@ -200,7 +276,7 @@ class DocumentExtractionService:
             extraction_schema = self._build_extraction_schema(schema)
             
             response = self.client.chat.completions.create(
-                model="gpt-4.1-mini",  
+                model="gpt-4o-mini",  
               messages=[
                     {
                         "role": "system",

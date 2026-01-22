@@ -1590,6 +1590,7 @@ class ExtractorManager {
         formData.append('file', this.selectedFile);
         formData.append('schema', JSON.stringify(schemaConfig));
         formData.append('extractor_id', extractorId);
+        formData.append('extraction_mode', 'vision'); // Use vision-based extraction for viewport page
         
         formData.append('extractionMetadata', JSON.stringify({
             hasPositionData: schemaConfig.fields.some(f => f.position?.rect),

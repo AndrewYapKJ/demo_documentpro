@@ -38,6 +38,7 @@ pillow==11.3.0
 ply==3.11
 pydantic==2.12.5
 pydantic_core==2.41.5
+PyMuPDF==1.26.7
 pyodbc==5.2.0
 python-dotenv==0.19.2
 pytz==2025.2
