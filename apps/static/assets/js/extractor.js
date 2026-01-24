@@ -63,6 +63,12 @@ class ExtractorManager {
             uploadBtn.addEventListener('click', (e) => this.handleUpload(e));
         }
 
+        // Auto-generate button listener
+        const autoGenerateBtn = document.querySelector('.auto-generate-btn');
+        if (autoGenerateBtn) {
+            autoGenerateBtn.addEventListener('click', () => this.handleAutoGenerate());
+        }
+
         this.setupDragAndDrop();
 
         const extractBtn = document.querySelector('.extractor-bottom-bar .dashboard-btn-primary');
@@ -2199,6 +2205,196 @@ class ExtractorManager {
             this.applyThemeStyles();
         });
         observer.observe(document.body, { attributes: true });
+    }
+
+    async handleAutoGenerate() {
+        if (!this.uploadedFile) {
+            alert('Please upload a document first');
+            return;
+        }
+
+        const autoBtn = document.querySelector('.auto-generate-btn');
+        if (!autoBtn) return;
+
+        // Disable button and show loading
+        autoBtn.disabled = true;
+        const originalContent = autoBtn.innerHTML;
+        autoBtn.innerHTML = `
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 5px; animation: spin 1s linear infinite;">
+                <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
+                <path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="0.75"/>
+            </svg>
+            Generating...
+        `;
+
+        try {
+            const formData = new FormData();
+            formData.append('file', this.uploadedFile);
+
+            const response = await fetch('/api/auto-generate-template', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Show success message
+                alert(`✨ ${data.message}\n\nTemplate has been created and saved!`);
+                
+                // Load the generated template
+                if (data.template && data.template.fields) {
+                    this.loadGeneratedTemplate(data.template.fields);
+                }
+                
+                // Optionally redirect to extractor list
+                if (confirm('Would you like to view all your templates?')) {
+                    window.location.href = '/index/extractor-list';
+                }
+            } else {
+                alert('Error: ' + (data.error || 'Failed to generate template'));
+            }
+        } catch (error) {
+            console.error('Auto-generate error:', error);
+            alert('Failed to generate template. Please try again.');
+        } finally {
+            // Restore button
+            autoBtn.disabled = false;
+            autoBtn.innerHTML = originalContent;
+        }
+    }
+
+    loadGeneratedTemplate(fields) {
+        // Clear existing fields
+        const schemaCard = document.querySelector('.extractor-schema-card');
+        const existingFields = schemaCard.querySelectorAll('.extractor-field-row');
+        existingFields.forEach(field => field.remove());
+
+        // Add generated fields
+        fields.forEach((field, index) => {
+            this.addFieldToUI(field, index + 1);
+        });
+
+        console.log('Loaded', fields.length, 'auto-generated fields');
+    }
+
+    addFieldToUI(field, index) {
+        // Create field HTML element
+        const fieldHTML = this.createFieldHTML(field, index);
+        
+        const addFieldBtn = document.querySelector('.extractor-add-field-btn');
+        
+        if (addFieldBtn) {
+            addFieldBtn.insertAdjacentHTML('beforebegin', fieldHTML);
+        }
+
+        // Reinitialize event listeners for the new field
+        this.reinitializeEventListeners();
+    }
+
+    createFieldHTML(field, index) {
+        const subfieldHTML = field.subfields ? field.subfields.map(sf => `
+            <div class="subfield-wrapper">
+                <div class="subfield-row">
+                    <div>
+                        <span class="subfield-name">${sf.name}</span>
+                        <span class="subfield-type ${sf.type}">${sf.type}</span>
+                    </div>
+                </div>
+                <div class="subfield-description">${sf.description || ''}</div>
+            </div>
+        `).join('') : '';
+
+        const tableColumnsHTML = field.subfields ? field.subfields.map(sf => `
+            <div class="table-column-row">
+                <div class="column-input-group">
+                    <label class="column-label">Column Name</label>
+                    <input type="text" class="form-control column-name-input" value="${sf.name}">
+                    <label class="column-label">Description</label>
+                    <input type="text" class="form-control column-description-input" value="${sf.description || ''}">
+                </div>
+                <div class="column-type-group">
+                    <label class="column-label">Type</label>
+                    <select class="form-control column-type-select">
+                        <option value="text" ${sf.type === 'text' ? 'selected' : ''}>Text</option>
+                        <option value="number" ${sf.type === 'number' ? 'selected' : ''}>Number</option>
+                        <option value="date" ${sf.type === 'date' ? 'selected' : ''}>Date</option>
+                    </select>
+                </div>
+                <div class="column-actions">
+                    <button type="button" class="column-delete-btn remove-column-btn">×</button>
+                </div>
+            </div>
+        `).join('') : '';
+
+        return `
+            <div class="extractor-field-row ${field.type === 'table' ? 'table-field' : ''}" id="field-${index}">
+                <div class="field-header">
+                    <div>
+                        <span class="field-name">${field.name}</span>
+                        <span class="field-type-badge ${field.type}">${field.type}</span>
+                    </div>
+                    <div class="field-actions">
+                        <button class="action-btn edit-btn" data-idx="${index}" data-action="edit" title="Edit Field">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20h9"/>
+                                <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+                            </svg>
+                        </button>
+                        <button class="action-btn delete delete-btn" data-idx="${index}" data-action="delete" title="Delete Field">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 6h18"/>
+                                <path d="M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6"/>
+                                <path d="M10 11v6"/>
+                                <path d="M14 11v6"/>
+                                <path d="M5 6V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="field-description">${field.description || ''}</div>
+                ${field.type === 'table' && field.subfields ? `
+                    <div class="table-subfields">
+                        <div class="table-columns-title">Table Columns:</div>
+                        <div class="subfields-container">
+                            ${subfieldHTML}
+                        </div>
+                    </div>
+                ` : ''}
+                <div class="field-editor" id="editor-${index}" style="display: none;">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="field-label">Field Type</label>
+                            <select class="form-control field-type-select">
+                                <option value="text" ${field.type === 'text' ? 'selected' : ''}>Text</option>
+                                <option value="number" ${field.type === 'number' ? 'selected' : ''}>Number</option>
+                                <option value="date" ${field.type === 'date' ? 'selected' : ''}>Date</option>
+                                <option value="table" ${field.type === 'table' ? 'selected' : ''}>Table</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="field-label">Field Name</label>
+                            <input type="text" class="form-control field-name-input" value="${field.name}">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="field-label">Field Description</label>
+                        <textarea class="form-control field-desc-input" rows="3">${field.description || ''}</textarea>
+                    </div>
+                    <div class="table-config" style="display:${field.type === 'table' ? 'block' : 'none'};">
+                        <label class="table-config-title">Table Columns Configuration</label>
+                        <div class="table-columns">
+                            ${tableColumnsHTML}
+                        </div>
+                        <button type="button" class="add-column-btn">+ Add Column</button>
+                    </div>
+                    <div class="editor-actions table-action-buttons">
+                        <button class="table-save-btn save-btn" data-idx="${index}" data-action="save">Save</button>
+                        <button class="table-cancel-btn cancel-btn" data-idx="${index}" data-action="cancel">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 }
 

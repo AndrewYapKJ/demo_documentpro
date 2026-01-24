@@ -644,6 +644,136 @@ def api_get_extractor_schema(identifier):
         }), 500
 
 
+@blueprint.route('/api/auto-generate-template', methods=['POST'])
+@login_required
+def api_auto_generate_template():
+    """
+    Auto-generate extraction template from uploaded invoice using OpenAI
+    """
+    try:
+        # Get uploaded file
+        if 'file' not in request.files:
+            return jsonify({'success': False, 'error': 'No file uploaded'})
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'success': False, 'error': 'No file selected'})
+        
+        # Read file content
+        file_content = file.read()
+        
+        # Initialize OpenAI client
+        from apps.services.extraction_service import DocumentExtractionService
+        extraction_service = DocumentExtractionService()
+        
+        if not extraction_service.client:
+            return jsonify({'success': False, 'error': 'OpenAI client not initialized. Check API key.'})
+        
+        # Prepare image for OpenAI
+        file_b64, mime_type = extraction_service._prepare_image_for_api(file_content)
+        
+        # Call OpenAI with prompt to analyze document structure
+        prompt = """Analyze this document and identify all data fields that should be extracted.
+        
+For each field you identify, provide:
+1. Field name (use snake_case, e.g., invoice_number, total_amount)
+2. Field type (text, number, date, or table)
+3. A clear description including label synonyms and location hints
+
+For table fields, identify the columns and their types.
+
+Return ONLY a valid JSON object with this structure:
+{
+    "template_name": "suggested template name",
+    "fields": [
+        {
+            "name": "field_name",
+            "type": "text|number|date|table",
+            "description": "description with label synonyms and location",
+            "subfields": [  // only for table type
+                {
+                    "name": "column_name",
+                    "type": "text|number|date",
+                    "description": "column description"
+                }
+            ]
+        }
+    ]
+}"""
+        
+        response = extraction_service.client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a document analysis expert. Analyze documents and extract field definitions for data extraction templates."
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": prompt
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:{mime_type};base64,{file_b64}"
+                            }
+                        }
+                    ]
+                }
+            ],
+            response_format={"type": "json_object"}
+        )
+        
+        # Parse response
+        template_data = json.loads(response.choices[0].message.content)
+        logger.info("Auto-generated template: %s", template_data)
+        
+        # Save to database
+        from apps.models.extractor import Extractor
+        from apps import db
+        
+        template_name = template_data.get('template_name', f'Auto-generated {file.filename}')
+        
+        # Create schema structure
+        schema = {
+            'fields': template_data.get('fields', []),
+            'documentMetadata': {
+                'source': 'auto-generated',
+                'filename': file.filename
+            }
+        }
+        
+        # Create new extractor
+        new_extractor = Extractor(
+            uid=Extractor.generate_uid(),
+            user_id=current_user.id,
+            name=template_name,
+            description=f'Auto-generated template from {file.filename}',
+            schema=schema
+        )
+        
+        db.session.add(new_extractor)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'template': template_data,
+            'extractor_id': new_extractor.id,
+            'extractor_uid': new_extractor.uid,
+            'message': f'Template "{template_name}" created successfully!'
+        })
+        
+    except json.JSONDecodeError as e:
+        logger.exception("JSON parsing error in OpenAI response: %s", e)
+        return jsonify({'success': False, 'error': 'Failed to parse template data from AI response'})
+    except Exception as e:
+        logger.exception("Auto-generate template error: %s", e)
+        return jsonify({'success': False, 'error': str(e)})
+
+
 # Helper - Extract current page name from request
 def get_segment(request):
 
