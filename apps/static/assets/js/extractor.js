@@ -618,6 +618,7 @@ class ExtractorManager {
         this.updateUploadDisplay(file);
         
         this.selectedFile = file;
+        this.uploadedFile = file; // Also set uploadedFile for auto-generate feature
         
         console.log('File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
     }
@@ -1021,6 +1022,8 @@ class ExtractorManager {
         e.preventDefault();
         
         this.selectedFile = null;
+        this.uploadedFile = null;
+        this.currentExtractorId = null; // Clear stored extractor ID
         
         this.resetUploadDisplay();
         
@@ -1088,15 +1091,28 @@ class ExtractorManager {
         
         this.showExtractionLoading();
         
-        this.saveExtractorTemplate(schemaConfig)
-            .then(extractorId => {
-                return this.performExtraction(extractorId, schemaConfig);
-            })
-            .catch(error => {
-                this.hideExtractionLoading();
-                console.error('Extraction error:', error);
-                alert('Extraction failed. Please try again.');
-            });
+        // Check if we already have an extractor ID from auto-generation
+        if (this.currentExtractorId) {
+            console.log('Using existing extractor ID:', this.currentExtractorId);
+            this.performExtraction(this.currentExtractorId, schemaConfig)
+                .catch(error => {
+                    this.hideExtractionLoading();
+                    console.error('Extraction error:', error);
+                    alert('Extraction failed. Please try again.');
+                });
+        } else {
+            // Save new template only if no extractor ID exists
+            this.saveExtractorTemplate(schemaConfig)
+                .then(extractorId => {
+                    this.currentExtractorId = extractorId; // Store for future use
+                    return this.performExtraction(extractorId, schemaConfig);
+                })
+                .catch(error => {
+                    this.hideExtractionLoading();
+                    console.error('Extraction error:', error);
+                    alert('Extraction failed. Please try again.');
+                });
+        }
     }
 
     async saveExtractorTemplate(schemaConfig) {
@@ -1283,12 +1299,18 @@ class ExtractorManager {
         const resultsContainer = document.querySelector('.extraction-results-container');
         if (!resultsContainer || !this.lastExtractionResults) return;
         
+        console.log('Populating extraction results:', this.lastExtractionResults);
+        
         let resultsHTML = '';
         
         const schemaMapping = this.getSchemaFieldMapping();
+        console.log('Schema mapping:', schemaMapping);
         
         Object.entries(this.lastExtractionResults).forEach(([fieldName, value]) => {
-            if (fieldName === 'line_items' && Array.isArray(value)) {
+            console.log('Processing field:', fieldName, 'value:', value);
+            
+            // Check if this is a table field (array of objects)
+            if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
                 resultsHTML += this.createTableResultHTML(fieldName, value, schemaMapping);
             } else {
                 resultsHTML += this.createFieldResultHTML(fieldName, value, schemaMapping);
@@ -1296,6 +1318,7 @@ class ExtractorManager {
         });
         
         resultsContainer.innerHTML = resultsHTML;
+        console.log('Results populated successfully');
     }
 
     createFieldResultHTML(fieldName, value, schemaMapping = {}) {
@@ -2239,6 +2262,9 @@ class ExtractorManager {
             const data = await response.json();
 
             if (data.success) {
+                // Store the extractor ID to prevent duplicate saves on extraction
+                this.currentExtractorId = data.extractor_id;
+                
                 // Show success message
                 alert(`✨ ${data.message}\n\nTemplate has been created and saved!`);
                 
@@ -2276,6 +2302,9 @@ class ExtractorManager {
         });
 
         console.log('Loaded', fields.length, 'auto-generated fields');
+        
+        // Reattach extract button listener after loading template
+        this.attachExtractButtonListener();
     }
 
     addFieldToUI(field, index) {

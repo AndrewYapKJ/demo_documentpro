@@ -673,36 +673,79 @@ def api_auto_generate_template():
         file_b64, mime_type = extraction_service._prepare_image_for_api(file_content)
         
         # Call OpenAI with prompt to analyze document structure
-        prompt = """Analyze this document and identify all data fields that should be extracted.
-        
-For each field you identify, provide:
-1. Field name (use snake_case, e.g., invoice_number, total_amount)
-2. Field type (text, number, date, or table)
-3. A clear description including label synonyms and location hints
+        prompt = """TASK: Analyze this document and create an extraction template for automated data extraction.
 
-For table fields, identify the columns and their types.
+STEP 1 - DOCUMENT ANALYSIS:
+First, identify:
+- What type of document is this? (e.g., Invoice, Bill of Lading, Purchase Order, Receipt, Shipping Document, etc.)
+- What is the primary purpose of this document?
+- What are the COMPULSORY fields that MUST be present in this document type?
+- What are the OPTIONAL fields that MAY be present?
 
-Return ONLY a valid JSON object with this structure:
+STEP 2 - FIELD IDENTIFICATION:
+For each field you identify, you must:
+1. Verify that the field label/keyword ACTUALLY EXISTS in the document (do not assume or infer)
+2. Provide the EXACT label text as it appears in the document
+3. Give examples of the actual values you see for this field
+4. Determine if this field is compulsory or optional for this document type
+
+STEP 3 - EXTRACTION RULES:
+Apply these STRICT rules:
+1. Do NOT infer values based on column position or proximity
+2. ONLY extract a field if the label or keyword explicitly exists near the value
+3. If a field label is missing in the document, DO NOT include it in the template
+4. Never shift values from neighboring columns to fill missing fields
+5. Field names like "vessel_name", "vessel", "mv" should ONLY be included if keywords like:
+   "Vessel", "Vessel Name", "MV", "M/V", "VSL" are explicitly present
+6. Port fields should ONLY be included if labels like "Port of Loading", "POL", "Port of Discharge", "POD" exist
+7. If fewer values appear than headers in a table, do NOT assume alignment - mark as unreliable
+8. For table fields, verify that all column headers are clearly visible and identifiable
+
+STEP 4 - FIELD DESCRIPTION FORMAT:
+For each field, provide a COMPLETE description with:
+- Purpose: What this field represents
+- Label variants: All possible label names found in this document type (e.g., "Invoice No.", "Inv#", "Reference Number")
+- Location: Where in the document this field typically appears (e.g., "top right header", "below company logo", "in the line items table")
+- Format: Expected format/pattern (e.g., "alphanumeric like INV-2024-001", "date format YYYY-MM-DD", "decimal number")
+- Validation: Any constraints (e.g., "must not be empty", "must be positive number")
+- Example: Actual example value you see in this document
+
+STEP 5 - OUTPUT FORMAT:
+Return ONLY a valid JSON object with this exact structure:
 {
-    "template_name": "suggested template name",
+    "document_type": "identified document type",
+    "document_purpose": "brief description of what this document is used for",
+    "template_name": "suggested template name based on document type",
     "fields": [
         {
-            "name": "field_name",
+            "name": "field_name_in_snake_case",
             "type": "text|number|date|table",
-            "description": "description with label synonyms and location",
+            "compulsory": true|false,
+            "description": "Complete description following STEP 4 format above. Include: Purpose, Label variants (comma-separated), Location, Format, Validation rules, Example value from this document",
+            "label_in_document": "exact label text as it appears in the document",
+            "example_value": "actual value found in this document",
             "subfields": [  // only for table type
                 {
-                    "name": "column_name",
+                    "name": "column_name_in_snake_case",
                     "type": "text|number|date",
-                    "description": "column description"
+                    "description": "Complete description with purpose, label variants, format, validation",
+                    "label_in_document": "exact column header text",
+                    "example_value": "actual value from first row"
                 }
             ]
         }
     ]
-}"""
+}
+
+IMPORTANT REMINDERS:
+- This template will be used for AUTOMATED extraction - accuracy is critical
+- If you're unsure whether a field exists, DO NOT include it
+- Better to have fewer accurate fields than many inaccurate ones
+- Cross-check that each field you include actually has a visible label in the document
+- Descriptions must be detailed enough for extraction logic to find the exact field location"""
         
         response = extraction_service.client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-5.2",
             messages=[
                 {
                     "role": "system",
